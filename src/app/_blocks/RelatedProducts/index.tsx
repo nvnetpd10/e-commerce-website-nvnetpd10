@@ -15,17 +15,13 @@ export type RelatedProductsProps = {
   relationTo: 'products'
 }
 
-export const RelatedProducts: React.FC<RelatedProductsProps> = props => {
-  const { introContent, docs, relationTo } = props
+export const RelatedProducts: React.FC<RelatedProductsProps> = (props) => {
+  const { docs, relationTo } = props
 
   return (
     <div className={classes.relatedProducts}>
-      {introContent && (
-        <Gutter className={classes.introContent}>
-          <RichText content={introContent} />
-        </Gutter>
-      )}
       <Gutter>
+        <h3 className={classes.title}>Related Products</h3>
         <div className={classes.grid}>
           {docs?.map((doc, index) => {
             if (typeof doc === 'string') return null
@@ -41,7 +37,7 @@ export const RelatedProducts: React.FC<RelatedProductsProps> = props => {
                   .filter(Boolean)
                   .join(' ')}
               >
-                <Card relationTo={relationTo} doc={doc} showCategories />
+                <Card key={doc.id} relationTo={relationTo} doc={doc} showCategories />
               </div>
             )
           })}

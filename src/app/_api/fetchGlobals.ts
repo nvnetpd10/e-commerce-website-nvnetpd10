@@ -1,11 +1,10 @@
-import type { Footer, Header, Settings } from '../../payload/payload-types'
-import { FOOTER_QUERY, HEADER_QUERY, SETTINGS_QUERY } from '../_graphql/globals'
 import { GRAPHQL_API_URL } from './shared'
+import { SETTINGS_QUERY, HEADER_QUERY, FOOTER_QUERY } from '../_graphql/globals'
 
 export async function fetchSettings(): Promise<Settings> {
-  if (!process.env.NEXT_PUBLIC_SERVER_URL) throw new Error('NEXT_PUBLIC_SERVER_URL not found')
+  if (!GRAPHQL_API_URL) throw new Error('NEXT_PUBLIC_SERVER_URL not found')
 
-  const settings = await fetch(`${GRAPHQL_API_URL}/api/graphql`, {
+  const response = await fetch(`${GRAPHQL_API_URL}/api/graphql`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -15,22 +14,26 @@ export async function fetchSettings(): Promise<Settings> {
       query: SETTINGS_QUERY,
     }),
   })
-    ?.then(res => {
-      if (!res.ok) throw new Error('Error fetching doc')
-      return res.json()
-    })
-    ?.then(res => {
-      if (res?.errors) throw new Error(res?.errors[0]?.message || 'Error fetching settings')
-      return res.data?.Settings
-    })
 
-  return settings
+  if (!response.ok) {
+    throw new Error('Error fetching doc')
+  }
+
+  const result = await response.json()
+
+  if (result.errors) {
+    throw new Error(result.errors[0]?.message || 'Error fetching settings')
+  }
+
+  return result.data?.Settings
 }
+
+// Similar changes for fetchHeader and fetchFooter
 
 export async function fetchHeader(): Promise<Header> {
   if (!GRAPHQL_API_URL) throw new Error('NEXT_PUBLIC_SERVER_URL not found')
 
-  const header = await fetch(`${GRAPHQL_API_URL}/api/graphql`, {
+  const response = await fetch(`${GRAPHQL_API_URL}/api/graphql`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -40,22 +43,24 @@ export async function fetchHeader(): Promise<Header> {
       query: HEADER_QUERY,
     }),
   })
-    ?.then(res => {
-      if (!res.ok) throw new Error('Error fetching doc')
-      return res.json()
-    })
-    ?.then(res => {
-      if (res?.errors) throw new Error(res?.errors[0]?.message || 'Error fetching header')
-      return res.data?.Header
-    })
 
-  return header
+  if (!response.ok) {
+    throw new Error('Error fetching doc')
+  }
+
+  const result = await response.json()
+
+  if (result.errors) {
+    throw new Error(result.errors[0]?.message || 'Error fetching header')
+  }
+
+  return result.data?.Header
 }
 
 export async function fetchFooter(): Promise<Footer> {
   if (!GRAPHQL_API_URL) throw new Error('NEXT_PUBLIC_SERVER_URL not found')
 
-  const footer = await fetch(`${GRAPHQL_API_URL}/api/graphql`, {
+  const response = await fetch(`${GRAPHQL_API_URL}/api/graphql`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -64,39 +69,16 @@ export async function fetchFooter(): Promise<Footer> {
       query: FOOTER_QUERY,
     }),
   })
-    .then(res => {
-      if (!res.ok) throw new Error('Error fetching doc')
-      return res.json()
-    })
-    ?.then(res => {
-      if (res?.errors) throw new Error(res?.errors[0]?.message || 'Error fetching footer')
-      return res.data?.Footer
-    })
 
-  return footer
-}
-
-export const fetchGlobals = async (): Promise<{
-  settings: Settings
-  header: Header
-  footer: Footer
-}> => {
-  // initiate requests in parallel, then wait for them to resolve
-  // this will eagerly start to the fetch requests at the same time
-  // see https://nextjs.org/docs/app/building-your-application/data-fetching/fetching
-  const settingsData = fetchSettings()
-  const headerData = fetchHeader()
-  const footerData = fetchFooter()
-
-  const [settings, header, footer]: [Settings, Header, Footer] = await Promise.all([
-    await settingsData,
-    await headerData,
-    await footerData,
-  ])
-
-  return {
-    settings,
-    header,
-    footer,
+  if (!response.ok) {
+    throw new Error('Error fetching doc')
   }
+
+  const result = await response.json()
+
+  if (result.errors) {
+    throw new Error(result.errors[0]?.message || 'Error fetching footer')
+  }
+
+  return result.data?.Footer
 }
